@@ -1,0 +1,57 @@
+# Environnements Python et caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environnements et secrets réels
+.env
+.env.*
+!.env.local.example
+!.env.test.example
+secrets/
+*.pem
+*.key
+
+# Modèles, paquets hors ligne et sauvegardes
+models/
+dist/
+backups/
+*.tar
+*.tar.gz
+*.tgz
+*.dump
+
+# État interne des collecteurs et caches `storage/` des notebooks
+storage/
+
+# Données volumineuses ou sensibles générées par le pipeline
+data/**
+!data/golden_set.jsonl
+!data/golden_set_expanded.jsonl
+!data/golden_sets/
+!data/golden_sets/*.jsonl
+!data/**/.gitkeep
+
+# Rapports générés localement
+reports/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Éditeurs et système d’exploitation
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Journaux et fichiers temporaires
+*.log
+*.tmp
+*.temp
+.tmp*/

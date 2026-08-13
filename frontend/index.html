@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LISA, assistant documentaire du Laboratoire d’Innovation Numérique en Statistique Appliquée de l’ENSEA.">
+  <title>LISA · ENSEA</title>
+  <link rel="icon" type="image/png" href="/assets/assets/lisa-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css?v=20260810-6">
+</head>
+<body>
+  <section class="auth-screen" id="auth-screen" aria-live="polite">
+    <div class="auth-brand"><img class="auth-logo-image" src="/assets/assets/lisa-mark.png" alt=""><span><strong>LISA</strong><small>Innovation · Data · Statistique</small></span></div>
+    <form class="auth-card" id="auth-form">
+      <div><span class="dialog-kicker">ESPACE SÉCURISÉ</span><h1 id="auth-title">Connexion</h1><p id="auth-description">Retrouvez vos conversations et les sources documentaires de l’ENSEA.</p></div>
+      <label id="auth-name-field" hidden><span>Nom affiché</span><input id="auth-name" autocomplete="name" maxlength="120"></label>
+      <label id="auth-email-field"><span>Adresse e-mail</span><input id="auth-email" type="email" autocomplete="email" required maxlength="254"></label>
+      <label id="auth-password-field"><span>Mot de passe</span><input id="auth-password" type="password" autocomplete="current-password" required maxlength="256"></label>
+      <label id="auth-confirm-field" hidden><span>Confirmer le mot de passe</span><input id="auth-confirm" type="password" autocomplete="new-password" maxlength="256"></label>
+      <p class="auth-error" id="auth-error" hidden></p>
+      <button class="primary-button" id="auth-submit" type="submit">Se connecter</button>
+      <div class="auth-links" id="auth-links">
+        <button type="button" id="auth-forgot">Mot de passe oublié ?</button>
+        <button type="button" id="auth-register">Créer un compte</button>
+      </div>
+      <button class="auth-guest-button" id="auth-guest" type="button"><span>Continuer sans compte</span><small>Session invitée temporaire</small></button>
+      <button class="auth-back-button" id="auth-back" type="button" hidden>← Retour à la connexion</button>
+      <div class="auth-affiliation"><span>Un laboratoire de</span><span class="ensea-logo-plate"><img src="/assets/assets/ensea-logo.png" alt="ENSEA"></span></div>
+    </form>
+  </section>
+  <div class="app-shell" id="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
+      <div class="sidebar-top">
+        <div class="sidebar-brand" aria-label="LISA, assistant du laboratoire de l’ENSEA"><img class="sidebar-brand-mark" src="/assets/assets/lisa-mark.png" alt=""><span class="sidebar-brand-copy"><strong>LISA</strong><small>Laboratoire ENSEA</small></span></div>
+        <button class="icon-button sidebar-toggle" id="sidebar-close" aria-label="Masquer la barre latérale" title="Masquer la barre latérale">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path></svg>
+        </button>
+      </div>
+
+      <nav class="primary-nav">
+        <button class="nav-item active" id="new-chat-button">
+          <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></span><span data-i18n="newChat">Nouvelle discussion</span>
+        </button>
+        <button class="nav-item" id="launch-button">
+          <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.2-2 4-2 4s2.8-.5 4-2c.7-.8.7-2 .1-2.7-.7-.6-1.8-.6-2.6.2Z"></path><path d="m9 15-3-3s.5-2.5 2-4c1.7-1.7 5.2-3.4 10-3-.1 4.8-1.3 8.3-3 10-1.5 1.5-4 2-4 2Z"></path><path d="M14 6s0 3 3 3"></path><circle cx="14" cy="10" r="1"></circle></svg></span><span data-i18n="tools">Outils</span>
+        </button>
+        <button class="nav-item" id="settings-button">
+          <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3-1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg></span><span data-i18n="settings">Paramètres</span>
+        </button>
+        <button class="nav-item admin-only" id="admin-button" hidden>
+          <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20h16M6 16V8m4 8V4m4 12v-6m4 6V7"></path></svg></span><span>Administration</span>
+        </button>
+      </nav>
+
+      <div class="history-head">
+        <span data-i18n="thisWeek">Cette semaine</span>
+        <label class="history-search" title="Rechercher">
+          <input id="conversation-search" type="search" aria-label="Rechercher une conversation">
+        </label>
+      </div>
+      <nav class="conversation-list" id="conversation-list" aria-live="polite"></nav>
+
+      <div class="sidebar-status" aria-live="polite">
+        <span class="status-dot" id="status-dot"></span>
+        <strong id="status-label">Connexion…</strong>
+        <span id="status-detail">Pipeline local</span>
+      </div>
+      <button class="sidebar-account" id="account-button">
+        <span class="account-avatar" id="account-avatar">A</span>
+        <span><strong id="account-name">Compte</strong><small id="account-role">Utilisateur</small></span>
+        <span class="account-menu-dot">•••</span>
+      </button>
+    </aside>
+
+    <button class="icon-button collapsed-toggle" id="menu-button" aria-label="Afficher la barre latérale" title="Afficher la barre latérale">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path></svg>
+    </button>
+    <button class="icon-button collapsed-new-chat" id="collapsed-new-chat" aria-label="Nouvelle discussion" title="Nouvelle discussion">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+    </button>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <main class="main-panel empty-state" id="main-panel">
+      <button class="conversation-name" id="rename-button" title="Renommer la conversation"><span id="conversation-title">New Chat</span></button>
+
+      <section class="chat-view" id="chat-view">
+        <section class="chat-scroll" id="chat-scroll">
+          <div class="chat-content">
+            <section class="welcome-state" id="welcome-state">
+              <div class="welcome-copy">
+                <img class="assistant-logo" src="/assets/assets/lisa-mark.png" alt="">
+                <h1 id="welcome-title">Bienvenue sur votre assistant ENSEA</h1>
+                <p id="welcome-subtitle">Interrogez les sources officielles, les rapports et la vie associative de l’école.</p>
+              </div>
+              <div class="welcome-suggestions" aria-label="Suggestions de questions">
+                <button type="button" data-suggestion data-label-fr="Découvrir l’ENSEA" data-label-en="Discover ENSEA" data-prompt-fr="Présente-moi l’ENSEA, son histoire, ses missions et ses formations." data-prompt-en="Introduce ENSEA, its history, mission and academic programs.">Découvrir l’ENSEA</button>
+                <button type="button" data-suggestion data-label-fr="Explorer les formations" data-label-en="Explore programs" data-prompt-fr="Quelles sont les formations proposées par l’ENSEA et comment y accéder ?" data-prompt-en="Which programs does ENSEA offer and how can students apply?">Explorer les formations</button>
+                <button type="button" data-suggestion data-label-fr="Consulter les rapports" data-label-en="Browse reports" data-prompt-fr="Quels rapports économiques récents sont disponibles et que faut-il en retenir ?" data-prompt-en="Which recent economic reports are available and what are their key findings?">Consulter les rapports</button>
+                <button type="button" data-suggestion data-label-fr="Vie associative" data-label-en="Campus life" data-prompt-fr="Présente-moi les clubs et associations de l’ENSEA en distinguant clairement leurs activités." data-prompt-en="Present ENSEA clubs and associations and clearly distinguish their activities.">Vie associative</button>
+                <button type="button" data-suggestion data-label-fr="Recherche et publications" data-label-en="Research" data-prompt-fr="Quels sont les principaux axes de recherche et publications de l’ENSEA ?" data-prompt-en="What are ENSEA’s main research areas and publications?">Recherche et publications</button>
+              </div>
+              <div class="welcome-panels">
+                <button class="welcome-panel-card" type="button" data-welcome-action="documents">
+                  <span class="welcome-panel-icon">PDF</span><span><small>Bibliothèque documentaire</small><strong>Parcourir les rapports et publications</strong><em>Documents ENSEA et sources économiques</em></span><span class="welcome-panel-arrow">↗</span>
+                </button>
+                <button class="welcome-panel-card" type="button" data-welcome-action="continue">
+                  <span class="welcome-panel-icon conversation">◎</span><span><small>Conversations</small><strong>Continuer votre dernière recherche</strong><em>Retrouvez votre historique personnel</em></span><span class="welcome-panel-arrow">→</span>
+                </button>
+              </div>
+            </section>
+            <div class="messages" id="messages" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <footer class="composer-area">
+          <form class="composer" id="composer-form">
+            <textarea id="message-input" rows="1" maxlength="4000" placeholder="Envoyer un message" data-i18n-placeholder="messagePlaceholder" aria-label="Votre question"></textarea>
+            <div class="composer-tools">
+              <div class="composer-tools-left">
+                <button class="round-tool" id="attach-button" type="button" aria-label="Ajouter un PDF" title="Ajouter un PDF"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
+                <button class="reasoning-tool" id="thinking-toggle" type="button" aria-pressed="false" aria-label="Activer le mode réflexion" title="Activer le mode réflexion"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 18h6M10 22h4"></path><path d="M8.2 14.8A7 7 0 1 1 15.8 14.8c-.9.7-1.3 1.4-1.3 2.2h-5c0-.8-.4-1.5-1.3-2.2Z"></path></svg><span data-i18n="thinkingMode">Réflexion</span></button>
+              </div>
+              <div class="composer-tools-right">
+                <span class="model-pill"><span id="model-name">qwen3.5:9b</span><svg class="chevron" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 10 3 3 3-3"></path></svg></span>
+                <button class="send-button" id="send-button" type="submit" aria-label="Envoyer"><span id="send-icon"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></span></button>
+              </div>
+            </div>
+          </form>
+        </footer>
+      </section>
+
+      <section class="launch-view" id="launch-view" hidden>
+        <div class="launch-content">
+          <header class="launch-header">
+            <div><h1 data-i18n="toolsTitle">Outils</h1><p class="launch-subtitle" id="tools-subtitle">Accédez à vos espaces de travail.</p></div>
+            <span class="role-badge" id="tools-role-badge">Utilisateur</span>
+          </header>
+
+          <section class="tool-section">
+            <div class="tool-section-heading"><span data-i18n="workspaceTools">VOTRE ESPACE</span><p data-i18n="workspaceToolsDescription">Les fonctions utiles pendant vos recherches.</p></div>
+            <div class="tool-card-grid">
+              <button class="tool-card" id="documents-button">
+                <span class="tool-card-icon coral">PDF</span><span class="tool-card-copy"><strong id="tool-documents-title">Bibliothèque documentaire</strong><small id="tool-documents-description">Consultez les documents disponibles.</small></span><span class="tool-card-action" id="tool-documents-action">Parcourir</span>
+              </button>
+              <button class="tool-card" id="metrics-button">
+                <span class="tool-card-icon violet">◎</span><span class="tool-card-copy"><strong id="tool-metrics-title">Mon activité</strong><small id="tool-metrics-description">Consultez vos conversations et vos temps de réponse.</small></span><span class="tool-card-action" id="tool-metrics-action">Consulter</span>
+              </button>
+              <button class="tool-card" id="tool-sessions-button">
+                <span class="tool-card-icon mono">ID</span><span class="tool-card-copy"><strong data-i18n="sessionsSecurity">Sessions et sécurité</strong><small data-i18n="sessionsSecurityDescription">Contrôlez les appareils connectés à votre compte.</small></span><span class="tool-card-action" data-i18n="manage">Gérer</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="tool-section admin-only" id="admin-tools-section">
+            <div class="tool-section-heading"><span data-i18n="systemAdministration">ADMINISTRATION DU SYSTÈME</span><p data-i18n="systemAdministrationDescription">Collecte, index, accès et configuration du RAG.</p></div>
+            <div class="admin-shortcut-grid">
+              <button data-open-admin="operations"><strong data-i18n="sourcesAndIndex">Sources et index</strong><small data-i18n="sourcesAndIndexDescription">Collecter, nettoyer, chunker et indexer</small></button>
+              <button data-open-admin="schedules"><strong data-i18n="scheduledJobs">Planifications</strong><small data-i18n="scheduledJobsDescription">Automatiser les mises à jour documentaires</small></button>
+              <button data-open-admin="models"><strong data-i18n="modelsAndPerformance">Modèles et performances</strong><small data-i18n="modelsAndPerformanceDescription">Choisir le modèle et le profil matériel</small></button>
+              <button data-open-admin="users"><strong data-i18n="usersAndAccess">Utilisateurs et accès</strong><small data-i18n="usersAndAccessDescription">Créer des comptes et attribuer les rôles</small></button>
+            </div>
+          </section>
+
+          <section class="tool-section">
+            <div class="tool-section-heading"><span data-i18n="availableKnowledge">CONNAISSANCES DISPONIBLES</span><p data-i18n="availableKnowledgeDescription">État réel des corpus consultés par l’assistant.</p></div>
+            <div class="source-status-grid">
+              <article><span class="source-mark">E</span><div><strong data-i18n="institutionalSources">Sources ENSEA</strong><small data-i18n="institutionalSourcesDescription">Pages officielles et PDF institutionnels</small></div><span id="tool-institutional-count">—</span></article>
+              <article><span class="source-mark eco">É</span><div><strong data-i18n="economicSources">Sources économiques</strong><small data-i18n="economicSourcesDescription">Rapports ANSTAT et bibliothèque ECO RCI</small></div><span id="tool-economic-count">—</span></article>
+              <article><span class="source-mark social">f</span><div><strong data-i18n="socialSources">Vie associative</strong><small data-i18n="socialSourcesDescription">Publications des clubs et associations</small></div><span id="tool-facebook-count">—</span></article>
+              <article><span class="source-mark ai">AI</span><div><strong data-i18n="answerModel">Modèle de réponse</strong><small id="tool-model-profile">Profil matériel optimisé</small></div><span id="tool-model-name">qwen3.5:9b</span></article>
+            </div>
+            <div class="pipeline-summary"><span class="status-dot" id="tool-pipeline-dot"></span><strong id="tool-pipeline-status">Connexion au système…</strong></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog class="settings-screen" id="settings-dialog">
+    <header class="settings-topbar">
+      <button class="icon-button settings-back" id="settings-close" aria-label="Retour"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg></button>
+      <h1 data-i18n="settings">Paramètres</h1>
+    </header>
+    <div class="settings-page">
+      <section class="account-card">
+        <div><strong id="settings-account-name">LISA</strong><span id="settings-account-email" data-i18n="brandSubtitle">Assistant documentaire intelligent</span><span class="role-badge account-role-badge" id="settings-role-badge">Utilisateur</span></div>
+        <div class="settings-brand-lockup" aria-label="LISA, Laboratoire d’Innovation Numérique en Statistique Appliquée de l’ENSEA"><img class="settings-lisa-mark" src="/assets/assets/lisa-mark.png" alt="LISA"><span class="ensea-logo-plate"><img src="/assets/assets/ensea-logo.png" alt="ENSEA"></span></div>
+      </section>
+      <div class="settings-section-label"><span data-i18n="interfacePreferences">INTERFACE</span><p data-i18n="interfacePreferencesDescription">Préférences propres à votre compte sur cet appareil.</p></div>
+      <section class="settings-card">
+        <div class="setting-item">
+          <span class="setting-icon language-icon">文</span><div><strong data-i18n="language">Langue</strong><span data-i18n="languageDescription">Choisissez la langue de l’interface.</span></div>
+          <div class="language-switcher"><button data-language-choice="fr">Français</button><button data-language-choice="en">English</button></div>
+        </div>
+        <div class="setting-item">
+          <span class="setting-icon">☼</span><div><strong data-i18n="appearance">Apparence</strong><span data-i18n="appearanceDescription">Basculez entre les thèmes sombre et clair.</span></div>
+          <div class="theme-switcher"><button data-theme-choice="dark" data-i18n="dark">Sombre</button><button data-theme-choice="light" data-i18n="light">Clair</button></div>
+        </div>
+      </section>
+      <div class="settings-section-label"><span data-i18n="accessAndPrivacy">ACCÈS ET CONFIDENTIALITÉ</span><p data-i18n="accessAndPrivacyDescription">Droits du compte, documents et sessions connectées.</p></div>
+      <section class="settings-card">
+        <div class="setting-item">
+          <span class="setting-icon">ID</span><div><strong data-i18n="accountAccess">Type de compte</strong><span id="settings-access-description">Accès aux conversations et aux documents partagés.</span></div><span class="status-pill neutral" id="settings-access-role">Utilisateur</span>
+        </div>
+        <div class="setting-item user-only">
+          <span class="setting-icon">◇</span><div><strong data-i18n="privateConversations">Conversations privées</strong><span data-i18n="privateConversationsDescription">Vous seul pouvez consulter l’historique associé à ce compte.</span></div><span class="status-pill" data-i18n="protected">Protégées</span>
+        </div>
+        <div class="setting-item">
+          <span class="setting-icon">▰</span><div><strong data-i18n="documentLibrary">Bibliothèque documentaire</strong><span id="settings-documents-description">Consultation des documents partagés par les administrateurs.</span></div><button class="setting-action" id="settings-documents-button" data-i18n="open">Ouvrir</button>
+        </div>
+        <div class="setting-item">
+          <span class="setting-icon">◉</span><div><strong data-i18n="connectedSessions">Sessions connectées</strong><span data-i18n="connectedSessionsDescription">Consultez et révoquez les autres connexions à votre compte.</span></div><button class="setting-action" id="sessions-button" data-i18n="manage">Gérer</button>
+        </div>
+        <div class="setting-item">
+          <span class="setting-icon">◎</span><div><strong data-i18n="localData">Données locales</strong><span data-i18n="localDataDescription">Les conversations, documents et modèles restent sur le serveur ENSEA.</span></div><span class="status-pill neutral" data-i18n="local">Local</span>
+        </div>
+      </section>
+      <div class="settings-section-label admin-only"><span data-i18n="administrationSettings">ADMINISTRATION</span><p data-i18n="administrationSettingsDescription">Les réglages qui affectent tous les utilisateurs.</p></div>
+      <section class="settings-card admin-only">
+        <div class="setting-item">
+          <span class="setting-icon">▦</span><div><strong data-i18n="modelsAndPerformance">Modèles et performances</strong><span data-i18n="modelsAndPerformanceDescription">Choisir le modèle et le profil matériel</span></div><button class="setting-action" data-settings-admin="models" data-i18n="configure">Configurer</button>
+        </div>
+        <div class="setting-item">
+          <span class="setting-icon">↻</span><div><strong data-i18n="collectionAndSchedules">Collecte et planifications</strong><span data-i18n="collectionAndSchedulesDescription">Pilotez les sources et les mises à jour automatiques.</span></div><button class="setting-action" data-settings-admin="schedules" data-i18n="configure">Configurer</button>
+        </div>
+        <div class="setting-item">
+          <span class="setting-icon">ID</span><div><strong data-i18n="usersAndAccess">Utilisateurs et accès</strong><span data-i18n="usersAndAccessDescription">Créer des comptes et attribuer les rôles</span></div><button class="setting-action" data-settings-admin="users" data-i18n="manage">Gérer</button>
+        </div>
+      </section>
+      <section class="settings-actions">
+        <button class="danger-button" id="logout-button">Se déconnecter</button>
+      </section>
+    </div>
+  </dialog>
+
+  <dialog class="admin-screen" id="admin-dialog">
+    <header class="settings-topbar admin-topbar">
+      <button class="icon-button settings-back" id="admin-close" aria-label="Retour"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg></button>
+      <div><h1>Administration</h1><p>Utilisateurs, sources, modèles et maintenance du système</p></div>
+      <span class="admin-health" id="admin-health">Chargement…</span>
+    </header>
+    <div class="admin-layout">
+      <nav class="admin-tabs" aria-label="Sections administratives">
+        <button class="active" data-admin-tab="operations">Opérations</button>
+        <button data-admin-tab="schedules">Planifications</button>
+        <button data-admin-tab="models">Modèles</button>
+        <button data-admin-tab="users">Utilisateurs</button>
+        <button data-admin-tab="security">Sécurité</button>
+        <button data-admin-tab="jobs">Activité</button>
+      </nav>
+      <main class="admin-content">
+        <section class="admin-panel active" data-admin-panel="operations">
+          <div class="admin-heading"><div><span class="dialog-kicker">SOURCES ET INDEX</span><h2>Piloter le cycle documentaire</h2></div><button class="secondary-button" id="admin-refresh">Actualiser</button></div>
+          <div class="admin-metric-grid" id="admin-metrics"></div>
+          <div class="operation-grid" id="operation-grid">
+            <button data-job-kind="collect_institutional"><strong>Collecter le site</strong><span>Met à jour les pages et PDF institutionnels.</span></button>
+            <button data-job-kind="collect_facebook"><strong>Collecter Facebook</strong><span>Récupère les dernières publications configurées.</span></button>
+            <button data-job-kind="import_local_documents"><strong>Importer les PDF locaux</strong><span>Synchronise la bibliothèque ANSTAT et les autres rapports déposés.</span></button>
+            <button data-job-kind="clean"><strong>Nettoyer les sources</strong><span>Normalise les corpus sans calculer de vecteurs.</span></button>
+            <button data-job-kind="chunk"><strong>Reconstruire les chunks</strong><span>Recrée les passages parent-enfant.</span></button>
+            <button data-job-kind="embed"><strong>Recalculer les embeddings</strong><span>Réserve le GPU et encode tous les chunks.</span></button>
+            <button data-job-kind="index"><strong>Reconstruire les index</strong><span>Met à jour LanceDB et BM25.</span></button>
+            <button class="accent-operation" data-job-kind="rebuild"><strong>Reconstruction RAG complète</strong><span>Nettoyage, chunks, embeddings et index.</span></button>
+            <button class="danger-operation" data-job-kind="full_refresh"><strong>Collecte + reconstruction</strong><span>Exécute tout le pipeline depuis les sources.</span></button>
+          </div>
+          <section class="parameter-box operation-configurator" id="operation-configurator" hidden>
+            <header class="parameter-box-header">
+              <div><span class="dialog-kicker" id="operation-kicker">OPÉRATION</span><h3 id="operation-title">Configurer l’opération</h3><p id="operation-description">Vérifiez le périmètre et l’impact avant le lancement.</p></div>
+              <button class="icon-button" id="operation-close" type="button" aria-label="Fermer">×</button>
+            </header>
+            <form id="operation-form" class="operation-form">
+              <div class="operation-parameters" id="operation-parameters"></div>
+              <aside class="operation-impact" id="operation-impact"></aside>
+              <div class="parameter-actions">
+                <button class="secondary-button" type="button" id="operation-cancel">Annuler</button>
+                <button class="primary-button" type="submit" id="operation-launch">Lancer</button>
+              </div>
+            </form>
+            <div class="collection-progress-card" id="operation-job-status" hidden>
+              <div class="collection-progress-copy"><div><strong id="operation-job-title">Traitement</strong><span id="operation-job-message">Préparation…</span></div><span id="operation-job-percent">0 %</span></div>
+              <div class="collection-progress-track"><span id="operation-job-fill"></span></div>
+              <small id="operation-job-detail">La progression se met à jour automatiquement.</small>
+            </div>
+          </section>
+          <section class="parameter-box facebook-collector" id="facebook-collector" hidden>
+            <header class="parameter-box-header">
+              <div><span class="dialog-kicker">COLLECTE SOCIALE</span><h3 id="facebook-collector-title">Configurer la collecte Facebook</h3><p id="facebook-collector-description">Choisissez exactement les pages et le volume à récupérer avant de lancer Apify.</p></div>
+              <button class="icon-button" id="facebook-collector-close" type="button" aria-label="Fermer">×</button>
+            </header>
+            <form id="facebook-collection-form" class="facebook-collection-form">
+              <div class="parameter-row token-row">
+                <div><strong>Accès Apify</strong><span>Le jeton est transmis uniquement au processus de collecte et n’apparaît pas dans l’historique.</span></div>
+                <span class="credential-state" id="facebook-token-state">Vérification…</span>
+              </div>
+              <label class="facebook-token-field" id="facebook-token-field">
+                <span>Jeton API Apify</span>
+                <input id="facebook-token" type="password" autocomplete="off" spellcheck="false" placeholder="apify_api_…">
+                <small id="facebook-token-hint">Disponible dans les paramètres de votre compte Apify.</small>
+              </label>
+              <label class="remember-secret" id="facebook-remember-row"><input id="facebook-remember-token" type="checkbox" checked><span>Conserver le jeton en mémoire jusqu’au redémarrage du serveur</span></label>
+
+              <div class="facebook-pages-heading">
+                <div><strong>Pages à collecter</strong><span id="facebook-selection-summary">0 page sélectionnée</span></div>
+                <div><button type="button" id="facebook-select-all">Tout sélectionner</button><button type="button" id="facebook-select-none">Effacer</button></div>
+              </div>
+              <div class="facebook-page-grid" id="facebook-page-options"></div>
+
+              <div class="parameter-row facebook-limit-row">
+                <div><strong>Publications par page</strong><span>La limite s’applique séparément à chacune des pages sélectionnées.</span></div>
+                <label><input id="facebook-max-posts" type="number" min="1" max="100" step="1" value="30"><span>publications</span></label>
+              </div>
+              <div class="facebook-estimate" id="facebook-estimate">Jusqu’à 0 publication au total</div>
+              <div class="parameter-actions">
+                <button class="secondary-button" type="button" id="facebook-cancel">Annuler</button>
+                <button class="primary-button" type="submit" id="facebook-launch">Lancer la collecte</button>
+              </div>
+            </form>
+            <div class="collection-progress-card" id="facebook-job-status" hidden>
+              <div class="collection-progress-copy"><div><strong id="facebook-job-title">Collecte Facebook</strong><span id="facebook-job-message">Préparation…</span></div><span id="facebook-job-percent">0 %</span></div>
+              <div class="collection-progress-track"><span id="facebook-job-fill"></span></div>
+              <small id="facebook-job-detail">La progression se met à jour automatiquement.</small>
+            </div>
+          </section>
+        </section>
+        <section class="admin-panel" data-admin-panel="schedules">
+          <div class="admin-heading"><div><span class="dialog-kicker">AUTOMATISATION</span><h2>Planifier les collectes</h2></div></div>
+          <form class="admin-form schedule-form" id="schedule-form">
+            <label><span>Nom</span><input id="schedule-name" required placeholder="Collecte hebdomadaire"></label>
+            <label><span>Traitement</span><select id="schedule-kind"><option value="collect_institutional">Collecte institutionnelle</option><option value="collect_facebook">Collecte Facebook</option><option value="import_local_documents">Import des PDF locaux</option><option value="rebuild">Reconstruction RAG</option><option value="full_refresh">Cycle complet</option></select></label>
+            <label><span>Fréquence</span><select id="schedule-interval"><option value="60">Chaque heure</option><option value="1440">Chaque jour</option><option value="10080" selected>Chaque semaine</option><option value="43200">Chaque mois</option></select></label>
+            <button class="primary-button" type="submit">Ajouter</button>
+            <fieldset class="schedule-facebook-config" id="schedule-facebook-config" hidden>
+              <legend>Paramètres Facebook de cette planification</legend>
+              <div class="schedule-facebook-pages" id="schedule-facebook-pages"></div>
+              <label><span>Publications par page</span><input id="schedule-facebook-max-posts" type="number" min="1" max="100" value="30"></label>
+              <small>Une planification nécessite un jeton APIFY_TOKEN configuré durablement sur le serveur.</small>
+            </fieldset>
+          </form>
+          <div class="admin-list" id="schedule-list"></div>
+        </section>
+        <section class="admin-panel" data-admin-panel="models">
+          <div class="admin-heading"><div><span class="dialog-kicker">INFÉRENCE</span><h2>Modèles et profil matériel</h2></div></div>
+          <form class="admin-form model-form" id="model-form">
+            <label><span>Modèle de génération</span><select id="generation-model"></select><small>Le changement est appliqué au prochain message.</small></label>
+            <label><span>Profil de performances</span><select id="performance-profile"><option value="cpu_only">CPU uniquement — compatible sans GPU</option><option value="generation_priority_8gb">RTX 8 Go — priorité à la génération</option><option value="balanced_gpu">GPU partagé — retrieval plus rapide</option></select><small>Le profil CPU fonctionne partout mais répond plus lentement. Le profil 8 Go réserve la VRAM au modèle de génération.</small></label>
+            <button class="primary-button" type="submit">Appliquer et recharger</button>
+          </form>
+          <div class="model-inventory" id="model-inventory"></div>
+        </section>
+        <section class="admin-panel" data-admin-panel="users">
+          <div class="admin-heading"><div><span class="dialog-kicker">ACCÈS</span><h2>Gérer les utilisateurs</h2></div></div>
+          <form class="admin-form user-form" id="user-form">
+            <label><span>Nom</span><input id="new-user-name" required></label>
+            <label><span>E-mail</span><input id="new-user-email" type="email" required></label>
+            <label><span>Mot de passe temporaire</span><input id="new-user-password" type="password" minlength="10" required></label>
+            <label><span>Rôle</span><select id="new-user-role"><option value="user">Utilisateur</option><option value="admin">Administrateur</option></select></label>
+            <button class="primary-button" type="submit">Créer le compte</button>
+          </form>
+          <div class="admin-list" id="user-list"></div>
+        </section>
+        <section class="admin-panel" data-admin-panel="security">
+          <div class="admin-heading"><div><span class="dialog-kicker">IDENTITÉ ET ACCÈS</span><h2>Surveiller les connexions</h2><p>Comptes, invités, récupérations et événements sensibles.</p></div></div>
+          <div class="admin-metric-grid" id="security-metrics"></div>
+          <div class="security-columns">
+            <section><div class="section-heading"><h3>Sessions récentes</h3></div><div class="admin-list" id="security-session-list"></div></section>
+            <section><div class="section-heading"><h3>Journal de sécurité</h3></div><div class="admin-list" id="security-audit-list"></div></section>
+          </div>
+        </section>
+        <section class="admin-panel" data-admin-panel="jobs">
+          <div class="admin-heading"><div><span class="dialog-kicker">JOURNAL</span><h2>Travaux récents</h2></div></div>
+          <div class="admin-list" id="job-list"></div>
+        </section>
+      </main>
+    </div>
+  </dialog>
+
+  <dialog class="app-dialog sessions-dialog" id="sessions-dialog">
+    <div class="dialog-header"><div><span class="dialog-kicker">SÉCURITÉ</span><h2>Sessions connectées</h2></div><button class="dialog-close" id="sessions-close" aria-label="Fermer">×</button></div>
+    <div class="admin-list" id="sessions-list"></div>
+  </dialog>
+
+  <dialog class="app-dialog documents-dialog" id="documents-dialog">
+    <div class="dialog-header"><div><span class="dialog-kicker" data-i18n="library">BIBLIOTHÈQUE</span><h2 id="documents-dialog-title">Bibliothèque documentaire</h2></div><button class="dialog-close" id="documents-close" aria-label="Fermer">×</button></div>
+    <div class="documents-layout">
+      <section class="upload-panel">
+        <label class="drop-zone" id="drop-zone"><input id="pdf-input" type="file" accept="application/pdf,.pdf" hidden><span class="drop-icon">＋</span><strong data-i18n="dropPdf">Déposez un fichier PDF</strong><small data-i18n="dropPdfHint">ou cliquez pour parcourir · 50 Mo maximum</small></label>
+        <div class="selected-file" id="selected-file" hidden></div>
+        <div class="metadata-grid">
+          <label><span data-i18n="title">Titre</span><input id="document-title" maxlength="240" placeholder="Titre du document" data-i18n-placeholder="documentTitlePlaceholder"></label>
+          <label><span data-i18n="authorDepartment">Auteur ou service</span><input id="document-author" maxlength="160" placeholder="Ex. Direction de la recherche" data-i18n-placeholder="authorPlaceholder"></label>
+          <label><span data-i18n="date">Date</span><input id="document-date" type="date"></label>
+          <label><span data-i18n="category">Catégorie</span><select id="document-category"><option value="rapport" data-i18n="report">Rapport</option><option value="article" data-i18n="researchArticle">Article scientifique</option><option value="memoire" data-i18n="dissertation">Mémoire</option><option value="administratif" data-i18n="administrative">Administratif</option><option value="formation" data-i18n="training">Formation</option><option value="autre" data-i18n="other">Autre</option></select></label>
+        </div>
+        <button class="primary-button" id="upload-button" disabled data-i18n="addAndIndex">Ajouter et indexer</button>
+        <div class="upload-progress" id="upload-progress" hidden><div class="progress-copy"><strong id="progress-title" data-i18n="processing">Traitement</strong><span id="progress-value">0 %</span></div><div class="progress-track"><span id="progress-fill"></span></div><p id="progress-message" data-i18n="preparingDocument">Préparation du document…</p></div>
+      </section>
+      <section class="library-panel"><div class="section-heading"><h3 data-i18n="indexedDocuments">Documents indexés</h3><span id="document-count">0</span></div><div class="document-list" id="document-list"></div></section>
+    </div>
+  </dialog>
+
+  <dialog class="app-dialog metrics-dialog" id="metrics-dialog">
+    <div class="dialog-header"><div><span class="dialog-kicker" id="metrics-dialog-kicker">ACTIVITÉ</span><h2 id="metrics-dialog-title">Mon activité</h2></div><button class="dialog-close" id="metrics-close" aria-label="Fermer">×</button></div>
+    <div class="metric-grid" id="metric-grid"></div><div class="route-breakdown" id="route-breakdown"></div>
+  </dialog>
+
+  <div class="toast-region" id="toast-region" aria-live="assertive"></div>
+  <script src="/assets/app.js?v=20260810-6" defer></script>
+</body>
+</html>

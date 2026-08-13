@@ -1,0 +1,139 @@
+name: lisa-test
+
+# Profil portable par défaut : CPU et exécution locale uniquement.
+# Le fichier compose.gpu.yaml active explicitement NVIDIA sans modifier cette base.
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lisa}
+      POSTGRES_USER: ${POSTGRES_USER:-lisa}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets: [postgres_password]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lisa} -d ${POSTGRES_DB:-lisa}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [private]
+
+  ollama:
+    image: ${OLLAMA_IMAGE:-ollama/ollama:latest}
+    restart: unless-stopped
+    environment:
+      OLLAMA_NO_CLOUD: "1"
+      OLLAMA_NUM_PARALLEL: "1"
+    volumes:
+      - ./models/ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    networks: [private]
+
+  api:
+    image: lisa-api:${LISA_IMAGE_TAG:-test}
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    env_file: ["${LISA_ENV_FILE:-.env.test}"]
+    environment:
+      RAG_ENV: ${RAG_ENV:-staging}
+      POSTGRES_DB: ${POSTGRES_DB:-lisa}
+      POSTGRES_USER: ${POSTGRES_USER:-lisa}
+      POSTGRES_HOST: postgres
+      RAG_DATABASE_PASSWORD_FILE: /run/secrets/postgres_password
+      RAG_SECRET_KEY_FILE: /run/secrets/application_key
+      RAG_FRONTEND_DIR: /srv/lisa/frontend
+      RAG_JOBS_INLINE: "0"
+      RAG_RUN_SCHEDULER: "0"
+      RAG_OFFLINE_MODE: ${RAG_OFFLINE_MODE:-1}
+      RAG_FORCE_CPU: ${RAG_FORCE_CPU:-1}
+      RAG_OLLAMA_NUM_GPU: ${RAG_OLLAMA_NUM_GPU:-0}
+      OLLAMA_HOST: http://ollama:11434
+      HF_HOME: /srv/lisa/models/huggingface
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      TRANSFORMERS_NO_TF: "1"
+      USE_TF: "0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ./data:/srv/lisa/data
+      - ./models/huggingface:/srv/lisa/models/huggingface:ro
+    secrets: [postgres_password, application_key]
+    networks: [private]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  worker:
+    image: lisa-api:${LISA_IMAGE_TAG:-test}
+    restart: unless-stopped
+    command: ["python", "-m", "backend.worker"]
+    env_file: ["${LISA_ENV_FILE:-.env.test}"]
+    environment:
+      RAG_ENV: ${RAG_ENV:-staging}
+      POSTGRES_DB: ${POSTGRES_DB:-lisa}
+      POSTGRES_USER: ${POSTGRES_USER:-lisa}
+      POSTGRES_HOST: postgres
+      RAG_DATABASE_PASSWORD_FILE: /run/secrets/postgres_password
+      RAG_SECRET_KEY_FILE: /run/secrets/application_key
+      RAG_JOBS_INLINE: "0"
+      RAG_RUN_SCHEDULER: "1"
+      RAG_OFFLINE_MODE: ${RAG_OFFLINE_MODE:-1}
+      RAG_FORCE_CPU: ${RAG_FORCE_CPU:-1}
+      RAG_OLLAMA_NUM_GPU: ${RAG_OLLAMA_NUM_GPU:-0}
+      OLLAMA_HOST: http://ollama:11434
+      HF_HOME: /srv/lisa/models/huggingface
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      TRANSFORMERS_NO_TF: "1"
+      USE_TF: "0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ./data:/srv/lisa/data
+      - ./models/huggingface:/srv/lisa/models/huggingface:ro
+    secrets: [postgres_password, application_key]
+    networks: [private]
+
+  frontend:
+    image: lisa-frontend:${LISA_IMAGE_TAG:-test}
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${LISA_HTTP_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [private]
+
+networks:
+  private:
+
+volumes:
+  postgres_data:
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  application_key:
+    file: ./secrets/application_key.txt

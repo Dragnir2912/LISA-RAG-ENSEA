@@ -1,0 +1,22 @@
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    environment:
+      LISA_DOMAIN: ${LISA_DOMAIN:?Définissez LISA_DOMAIN dans .env.test}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deployment/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      frontend:
+        condition: service_started
+    networks: [private]
+
+volumes:
+  caddy_data:
+  caddy_config:

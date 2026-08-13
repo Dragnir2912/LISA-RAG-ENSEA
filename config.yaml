@@ -1,0 +1,213 @@
+# Configuration centrale du pipeline RAG ENSEA.
+# Chaque paramètre important du pipeline est ici, pas codé en dur dans src/.
+
+project:
+  base_url: "https://ensea.ed.ci/"
+  sitemap_url: "https://ensea.ed.ci/sitemap_index.xml"
+  data_dir: "data"
+
+scraping:
+  max_pages: 0          # 0 = illimité (crawl exhaustif) ; utile pour un run partiel de test
+  max_concurrency: 4     # requêtes simultanées, poli envers le serveur ENSEA
+  request_delay_seconds: 0.5
+  user_agent: "ENSEA-RAG-Bot/1.0 (+educational research crawler; respects robots.txt)"
+  download_pdfs: true
+
+# Source séparée : les publications ne sont pas ajoutées automatiquement à
+# l'index institutionnel. Elles doivent d'abord passer le notebook de contrôle.
+facebook_scraping:
+  enabled: false
+  pages:
+    ENSEA_page: "https://web.facebook.com/ensea.ci"
+    CDR_page: "https://web.facebook.com/cdr.ensea.1"
+    EJS_page: "https://web.facebook.com/profile.php?id=100057477850085"
+    EDSC_page: "https://web.facebook.com/edsc.ensea"
+    ECOSTAT_page: "https://web.facebook.com/DepecheEcostat"
+    AES_page: "https://web.facebook.com/profile.php?id=61566561886908"
+    DISE_page: "https://web.facebook.com/profile.php?id=61577286778081"
+    DAS_page: "https://web.facebook.com/DivisionAS"
+  # Une page explicitement nommee devient un filtre de metadonnees. Ajouter
+  # une future structure revient a ajouter sa page et ses alias ici.
+  page_aliases:
+    ENSEA_page: ["page facebook de l'ensea", "page officielle de l'ensea"]
+    CDR_page: ["cdr", "club de debat et de reflexions", "club de debats et de reflexions", "club de debat et de rhetorique"]
+    EJS_page: ["ejs", "ensea junior services", "junior services"]
+    EDSC_page: ["edsc", "ensea data science club", "data science club"]
+    ECOSTAT_page: ["ecostat", "depeche ecostat"]
+    AES_page: ["aes", "association des eleves et stagiaires"]
+    DISE_page: ["dise", "division des ingenieurs statisticiens economistes"]
+    DAS_page: ["das", "division des analystes statisticiens"]
+  max_posts_per_page: 30
+  actor_id: "apify/facebook-posts-scraper"
+  raw_dir: "data/facebook/raw"
+  cleaned_candidate_dir: "data/facebook/cleaned"
+  chunks_candidate_path: "data/facebook/chunks.jsonl"
+  vectorstore_candidate_uri: "data/facebook/lancedb"
+  vectorstore_candidate_table: "facebook_chunks"
+  bm25_candidate_path: "data/facebook/bm25_index.pkl"
+  min_post_characters: 20
+  min_rag_characters: 80
+  normalize_unicode: true
+  deduplicate_content: true
+  retrieval_enabled: true       # index séparé + routeur validés par le notebook 15
+  max_combined_results: 5
+  institutional_bias_both: 0.02 # légère priorité aux sources officielles en route mixte
+
+# Documents économiques originaux déposés localement. Ils partagent le nettoyage
+# et le modèle d'embedding, puis sont placés dans un index économique séparé.
+local_documents:
+  enabled: true
+  source_dir: "data/sources/eco_rci"
+  raw_dir: "data/raw"
+  report_path: "data/import_reports/eco_rci.json"
+  public_route_prefix: "/api/source-files"
+  chunks_path: "data/economic/chunks.jsonl"
+  vectors_path: "data/economic/vectors.npy"
+  vectorstore_uri: "data/economic/lancedb"
+  vectorstore_table: "economic_chunks"
+  bm25_index_path: "data/economic/bm25_index.pkl"
+  retrieval_enabled: true
+  # Reconstruction des series statistiques avec leurs coordonnees PDF.
+  extract_table_facts: true
+  table_min_periods: 2
+  table_max_facts_per_page: 500
+
+cleaning:
+  min_content_length: 80        # en caractères, en dessous = page probablement vide/boilerplate
+  boilerplate_dedup_threshold: 0.30  # fragment présent sur >30% des pages -> supprimé
+
+chunking:
+  strategy: "markdown_header_recursive_parent_child"
+  child_chunk_size_tokens: 400
+  parent_chunk_size_tokens: 1800
+  chunk_overlap_ratio: 0.15
+  headers_to_split_on:
+    - ["#", "h1"]
+    - ["##", "h2"]
+    - ["###", "h3"]
+
+embeddings:
+  model_name: "BAAI/bge-m3"
+  device: "cuda"
+  precision: "fp16"
+  batch_size: 16
+  normalize: true
+  alternatives:              # modèles comparés dans le notebook (étape 4)
+    - "BAAI/bge-m3"
+    - "intfloat/multilingual-e5-large"
+    - "nomic-ai/nomic-embed-text-v1.5"
+    - "Snowflake/snowflake-arctic-embed-l"
+    - "jinaai/jina-embeddings-v3"
+
+vectorstore:
+  backend: "lancedb"
+  uri: "data/embeddings/lancedb"
+  table_name: "ensea_chunks"
+  bm25_index_path: "data/embeddings/bm25_index.pkl"
+
+retrieval:
+  top_k_dense: 30
+  top_k_bm25: 30
+  rrf_k: 60                 # constante standard du Reciprocal Rank Fusion
+  mmr_lambda: 0.5
+  mmr_top_k: 15
+  max_candidates_per_parent: 1  # évite plusieurs enfants quasi identiques du même parent
+  max_candidates_per_url: 2     # garde au plus 2 passages d'un document avant reranking
+  max_results_per_url: 1        # diversité stricte dans la réponse finale
+  max_table_fact_results_per_url: 2 # texte narratif + ligne statistique du meme PDF
+  max_result_vector_similarity: 0.92  # filtre les pages miroirs/quasi identiques
+  rerank_top_k: 5
+  exhaustive_max_results: 10  # seulement pour « tous », « liste complète », « exhaustif »
+  exhaustive_top_k_dense: 80  # bassin sémantique élargi uniquement en mode exhaustif
+  exhaustive_top_k_bm25: 120  # bassin lexical élargi uniquement en mode exhaustif
+  exhaustive_mmr_top_k: 40    # davantage de candidats soumis au reranker
+  exhaustive_mmr_lambda: 0.85 # privilégie la couverture même si les éléments se ressemblent
+  exhaustive_max_result_vector_similarity: 0.995 # conserve les éléments distincts mais très similaires
+  exhaustive_anchor_max_document_frequency: 30 # terme rare mais partagé par plusieurs documents
+  exhaustive_anchor_max_candidates: 20         # rappels lexicaux ajoutés au lot du reranker
+  exhaustive_anchor_rerank_bonus: 0.15          # léger bonus de couverture, jamais appliqué aux requêtes normales
+  exhaustive_anchor_title_min_rerank_score: 0.30 # réserve les annonces explicites confirmées par le reranker
+  exhaustive_noncoverage_score_floor: 0.55      # retire du prompt les résultats faibles qui n'apportent aucune couverture
+  exhaustive_noncoverage_relative_margin: 0.12 # conserve les résultats proches du meilleur score ; les preuves de couverture restent protégées
+  min_similarity_score: 0.25   # seuil sous lequel une citation est jugée non fiable
+  lexical_rescue_max_bm25_rank: 1       # conserve le meilleur hit lexical s'il est crédible
+  lexical_rescue_min_rerank_score: 0.85 # garde-fou contre les correspondances lexicales faibles
+  title_candidate_enabled: true          # validé : +1 Hit@5 development, aucune régression
+  title_candidate_top_k: 1               # au plus un passage supplémentaire à reranker
+  title_candidate_min_coverage: 0.60     # part minimale des mots informatifs du titre retrouvée
+
+  table_fact_base_boost: 0.005
+  table_fact_period_boost: 0.030
+  table_fact_period_mismatch_penalty: 0.080 # écarte une bonne mesure associée à la mauvaise période
+  table_fact_indicator_boost: 0.020
+  table_fact_min_indicator_coverage: 0.45
+  table_fact_focus_boost: 0.100 # groupe explicitement compté après « combien de/d' »
+  table_fact_measure_alignment_weight: 0.400 # distingue fortement niveau, taux, part et sous-population
+  table_fact_channel_rank_weight: 0.180 # protège le meilleur fait atomique sur une question directe
+  table_fact_preferred_period_boost: 0.060   # 2023-2024 scolaire correspond à la colonne 2024
+  table_fact_secondary_period_penalty: 0.040
+  table_fact_candidate_top_k: 8  # rappel par ligne d'indicateur avant choix de la cellule temporelle
+  table_fact_rrf_weight: 1.0     # poids du troisième canal structuré dans la fusion de rangs
+  page_rescue_enabled: true      # recherche la meilleure page dans les documents deja identifies
+  page_rescue_top_documents: 5  # nombre maximal de documents semences
+  page_rescue_per_document: 2   # pages/cellules representatives par document
+  page_rescue_rrf_weight: 0.8   # canal de rappel, toujours soumis au reranker
+  page_rescue_rank_weight: 0.12 # departage les bonnes pages confirmees par le cross-encoder
+
+reranker:
+  model_name: "BAAI/bge-reranker-v2-m3"
+  device: "cuda"
+  precision: "fp16"
+
+generation:
+  provider: "ollama"
+  model_name: "qwen3.5:9b"
+  alternatives:
+    - "llama3.2:3b"       # option rapide / VRAM minimale
+    - "gemma3:12b"        # option qualité max (si VRAM disponible)
+    - "mistral:7b"
+  temperature: 0.1
+  thinking: false             # inutile pour les réponses RAG factuelles et beaucoup plus rapide
+  min_num_ctx: 6144           # profil 6K assumé pour laisser davantage de place au contexte et au raisonnement
+  num_ctx: 6144               # plafond fixe 6K ; surveiller la VRAM sur la RTX 5060 Laptop 8 Go
+  context_budget_tokens: 6000  # budget maximal cumulé des passages documentaires
+  max_passage_tokens: 360      # permet d'inclure les 5 preuves ; compression ciblée au-delà
+  reserved_output_tokens: 1536 # réserve élargie pour la réflexion et la réponse finale
+  max_output_tokens: 640       # plafond des réponses sans réflexion
+  thinking_output_tokens: 1536 # raisonnement interne + réponse ; le secours sans réflexion reste actif
+  direct_output_tokens: 320    # question factuelle : réponse dense sans longueur inutile
+  numeric_output_tokens: 192   # valeur simple : réponse directe et sans digressions coûteuses
+  explanation_output_tokens: 520
+  enumeration_output_tokens: 640
+  repeat_penalty: 1.15         # réduit les boucles verbatim sans appauvrir les réponses factuelles
+  repeat_last_n: 256           # fenêtre de détection de répétition d'Ollama
+  max_consecutive_duplicate_list_items: 2 # arrêt du flux si le modèle boucle sur une puce
+  response_cache_size: 128     # cache LRU exact ; 0 permet de le désactiver
+  keep_alive: "30m"           # garde Qwen chargé entre deux tours de conversation
+  num_batch: 256               # accélère l’évaluation du prompt sur la RTX 5060 8 Go
+  num_gpu: null                # null = auto ; le déploiement CPU force 0 via RAG_OLLAMA_NUM_GPU
+  stream: true
+
+# Le serveur interactif réserve la VRAM au LLM. Les notebooks d'indexation
+# continuent d'utiliser les valeurs CUDA des sections embeddings/reranker.
+runtime:
+  performance_profile: "generation_priority_8gb"
+  online_embeddings_device: "cpu"
+  online_reranker_device: "cpu"
+  torch_cpu_threads: 8
+
+evaluation:
+  golden_set_path: "data/golden_set.jsonl"
+  expanded_golden_set_path: "data/golden_set_expanded.jsonl"
+  banque_100_golden_set_path: "data/golden_sets/banque_100_questions_corrigee.jsonl"
+  runs_dir: "data/evaluation_runs"
+  k_values: [3, 5, 10]
+  ragas_judge_model: "qwen3.5:9b" # même modèle Ollama local, pas d'appel API payant
+
+observability:
+  enabled: true
+  traces_path: "data/observability/traces.jsonl"
+  log_questions: true       # désactiver si les questions peuvent contenir des données sensibles
+  log_answers: false        # les réponses complètes occupent vite beaucoup d'espace
+  max_file_mb: 50
+  keep_files: 3

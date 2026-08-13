@@ -1,0 +1,28 @@
+* text=auto
+
+# Les scripts Linux doivent conserver des fins de ligne LF après un clonage Windows.
+*.sh text eol=lf
+Dockerfile* text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.ipynb text eol=lf
+
+# Scripts destinés à Windows.
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+
+# Ressources binaires.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.npy binary
+*.pkl binary

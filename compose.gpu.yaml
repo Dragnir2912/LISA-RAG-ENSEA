@@ -1,0 +1,16 @@
+# Overlay NVIDIA facultatif. Ne l'utilisez pas sur un serveur CPU.
+services:
+  ollama:
+    gpus: all
+
+  api:
+    gpus: all
+    environment:
+      RAG_FORCE_CPU: "0"
+      RAG_OLLAMA_NUM_GPU: "999"
+
+  worker:
+    gpus: all
+    environment:
+      RAG_FORCE_CPU: "0"
+      RAG_OLLAMA_NUM_GPU: "999"

@@ -1,0 +1,7 @@
+-r requirements.txt
+
+# Persistance, mots de passe et verrou inter-processus du déploiement serveur
+psycopg[binary]>=3.2,<4
+argon2-cffi>=23.1,<26
+filelock>=3.16,<4
+cryptography>=42,<46

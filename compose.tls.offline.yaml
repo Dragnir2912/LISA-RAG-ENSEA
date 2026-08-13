@@ -1,0 +1,25 @@
+# HTTPS sans autorité de certification en ligne. Placez un certificat déjà
+# délivré dans secrets/tls/fullchain.pem et sa clé dans secrets/tls/privkey.pem.
+services:
+  caddy:
+    image: ${CADDY_IMAGE:-caddy:2.10-alpine}
+    restart: unless-stopped
+    environment:
+      LISA_DOMAIN: ${LISA_DOMAIN:?Définissez LISA_DOMAIN dans le fichier d'environnement}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deployment/Caddyfile.offline:/etc/caddy/Caddyfile:ro
+      - ./secrets/tls:/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      frontend:
+        condition: service_started
+    networks: [private]
+
+volumes:
+  caddy_data:
+  caddy_config:
